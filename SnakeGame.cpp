@@ -5,9 +5,12 @@
 using namespace std;
 
 bool gameOver;
-const int boardSize = 20;
-char board[boardSize][boardSize];
-int x, y, foodX, foodY;
+const int boardSizeX = 20;
+const int boardSizeY = 20;
+char board[boardSizeX][boardSizeY];
+int x, y, foodX, foodY, score;
+enum eDirection {STOP = 0, LEFT, RIGHT, UP, DOWN};
+eDirection dir;
 
 class Node{
 public:
@@ -83,14 +86,26 @@ public:
 
 void Setup() {
     gameOver = false;
+    dir = STOP;
+    x = boardSizeX / 2;
+    y = boardSizeY / 2;
+    foodX = rand() %  boardSizeX;
+    foodY = rand() %  boardSizeY;
+    score = 0;
 }
 
 void Draw() {
     system("CLS");
+    
+    for(int i = 0; i < boardSizeX; i++){
+        board[0][i] = '#';
+        cout << board[0][i];
+    }
+    cout << endl;
 
-    for(int i = 0; i < boardSize; i++) {
-        for(int j = 0; j < boardSize; j++) {
-            if(j == 0 || j == boardSize - 1 || i == 0 || i == boardSize - 1) {
+    for(int i = 0; i < boardSizeX; i++) {
+        for(int j = 0; j < boardSizeY; j++) {
+            if(j == 0 || j == boardSizeY - 1) {
                 board[i][j] = '#';
                 cout << board[i][j];
             }else {
@@ -99,6 +114,11 @@ void Draw() {
             }
         }
         cout << endl;
+    }
+
+    for(int i = 0; i < boardSizeX; i++){
+        board[boardSizeX-1][i] = '#';
+        cout << board[boardSizeX-1][i];
     }
 }
 
