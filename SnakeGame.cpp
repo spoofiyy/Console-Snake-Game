@@ -181,7 +181,7 @@ void Logic() {
             position.push(++y);
             y = position.top();
             position.pop();
-            break;
+            break; 
         case RIGHT:
             position.push(++x);
             x = position.top();
@@ -190,6 +190,10 @@ void Logic() {
         default:
             break;
     }
+    if (x > boardSizeX-3 || x < 0 || y > boardSizeY-1 || y < 0) {
+        gameOver = true;
+    }
+    
 }
 
 int main() {
