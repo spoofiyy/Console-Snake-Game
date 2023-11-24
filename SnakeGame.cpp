@@ -1,6 +1,7 @@
 #include <iostream>
 #include <windows.h>
 #include <conio.h>
+#include <stack>
 
 using namespace std;
 
@@ -11,6 +12,8 @@ char board[boardSizeX][boardSizeY];
 int x, y, foodX, foodY, score;
 enum eDirection {STOP = 0, LEFT, RIGHT, UP, DOWN};
 eDirection dir;
+
+stack<int> position;
 
 class Node{
 public:
@@ -111,7 +114,7 @@ void Draw() {
 
     for(int i = 0; i < boardSizeY; i++) {
         for(int j = 0; j < boardSizeX; j++) {
-            if(j == 0 || j == boardSizeY - 2) {
+            if(j == 0 || j == boardSizeX - 2) {
                 board[i][j] = '#';
                 cout << board[i][j];
             }
@@ -154,14 +157,39 @@ void Input() {
             case 'd':
                 dir = RIGHT;
                 break;
-            default:
+            case 'x':
+                gameOver = true;
                 break;
         }
     }
 }
 
 void Logic() { 
-
+    switch (dir)
+    {
+        case UP:
+            position.push(--y);
+            y = position.top();
+            position.pop();
+            break;
+        case LEFT:
+            position.push(--x);
+            x = position.top();
+            position.pop();
+            break;
+        case DOWN:
+            position.push(++y);
+            y = position.top();
+            position.pop();
+            break;
+        case RIGHT:
+            position.push(++x);
+            x = position.top();
+            position.pop();
+            break;
+        default:
+            break;
+    }
 }
 
 int main() {
