@@ -82,7 +82,13 @@ public:
         temp->next = nullptr;
         tail = temp;
     }
+
+    Node* getHead() {
+        return head;
+    }
 }; 
+
+Snake snake;
 
 void Setup() {
     gameOver = false;
@@ -103,14 +109,25 @@ void Draw() {
     }
     cout << endl;
 
-    for(int i = 0; i < boardSizeX; i++) {
-        for(int j = 0; j < boardSizeY; j++) {
-            if(j == 0 || j == boardSizeY - 1) {
+    for(int i = 0; i < boardSizeY; i++) {
+        for(int j = 0; j < boardSizeX; j++) {
+            if(j == 0 || j == boardSizeY - 2) {
                 board[i][j] = '#';
                 cout << board[i][j];
-            }else {
-                board[i][j] = ' ';
+            }
+            if(i == y && j == x) {
+                if(snake.getHead() == nullptr) {
+                    snake.addBody('O');
+                }
+                board[i][j] = snake.getHead()->snakeBody;
                 cout << board[i][j];
+            }else if(i == foodY && j == foodX) {
+                cout << 'F';
+            }else {
+                if(j < boardSizeX-2) {
+                    board[i][j] = ' ';
+                    cout << board[i][j];
+                }
             }
         }
         cout << endl;
@@ -123,7 +140,24 @@ void Draw() {
 }
 
 void Input() {
-
+    if(_kbhit()) {
+        switch(_getch()) {
+            case 'w':
+                dir = UP;
+                break;
+            case 'a':
+                dir = LEFT;
+                break;
+            case 's':
+                dir = DOWN;
+                break;
+            case 'd':
+                dir = RIGHT;
+                break;
+            default:
+                break;
+        }
+    }
 }
 
 void Logic() { 
@@ -137,7 +171,7 @@ int main() {
         Draw();
         Input();
         Logic();
-        Sleep(10);
+        Sleep(40);
     }
 
     return 0;
