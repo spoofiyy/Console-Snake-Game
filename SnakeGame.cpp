@@ -13,7 +13,7 @@ char board[boardSizeX][boardSizeY];
 int x, y, foodX, foodY, score;
 int tailX[boardSizeX * boardSizeY];
 int tailY[boardSizeX * boardSizeY];
-enum eDirection {STOP = 0, LEFT, RIGHT, UP, DOWN};
+enum eDirection {STOP = 0, LEFT, RIGHT, UP, DOWN}; // State constants
 eDirection dir, tempDir;
 queue<int> foodPosX;
 queue<int> foodPosY;
@@ -120,52 +120,66 @@ Snake snake;
 void Setup() {
     gameOver = false;
     dir = STOP;
-    x = boardSizeX / 2;
-    y = boardSizeY / 2;
+    // Place starting head on the middle of the board
+    x = boardSizeX / 2; 
+    y = boardSizeY / 2; 
+    // Initial food position
     foodPosX.push(rand() % (boardSizeX-2));
     foodPosY.push(rand() % (boardSizeY-2));
     foodX = foodPosX.front();
     foodY = foodPosY.front();
     score = 0;
+    tailX, tailY;
+
 }
 
+int tempx, tempy;
 void Draw() {
     system("CLS");
     
+    // Top edge of the board
     for(int i = 0; i < boardSizeX; i++){
         board[0][i] = '#';
         cout << board[0][i];
     }
     cout << endl;
 
+    // Middle board
     for(int i = 0; i < boardSizeY; i++) {
         for(int j = 0; j < boardSizeX; j++) {
+            // Left edge of the board
             if(j == 0) {
                 board[i][j] = '#';
                 cout << board[i][j];
             }
+            // Intialize head of the snake in the middle of the board
             if(i == y && j == x) {
                 if(snake.getHead() == nullptr) {
                     snake.addHead('O');
                 }
                 board[i][j] = snake.getHead()->snakeBody;
                 cout << board[i][j];
+            // Display food randomly in the board
             }else if(i == foodPosY.front() && j == foodPosX.front()) {
                 cout << 'F';
             }else {
+                // Print body extension
                 bool print = false;
-                for(int k = 0; k < snake.countBody() && snake.getHead() != snake.getTail(); k++) {
+                for(int k = 0; k < snake.countBody() && snake.getHead() != snake.getTail(); k++) { // Body extension
                     if(tailX[k] == j && tailY[k] == i) {
                         board[i][j] = snake.getTail()->snakeBody;
                         cout << board[i][j];
                         print = true;
+                        tempx = k;
                     }
+                    
                 }
-                if(!print && j < boardSizeY - 2) {
+                if(!print && j < boardSizeY - 2) { // Print space only if not the coordinates of the body
                     board[i][j] = ' ';
                     cout << board[i][j];
                 }
             }
+            // Right edge of the board
             if(j == boardSizeX-2) {
                 cout << "#";
             }
@@ -173,14 +187,17 @@ void Draw() {
         cout << endl;
     }
 
+    // Bottom edge of the board
     for(int i = 0; i < boardSizeX; i++){
         board[boardSizeX-1][i] = '#';
         cout << board[boardSizeX-1][i];
     }
+    // Track score
     cout << "\nScore: " << score << endl;
 }
 
 void Input() {
+    // Process the pressed key
     if(_kbhit()) {
         switch(_getch()) {
             case 'w':
@@ -211,20 +228,25 @@ void Input() {
 }
 
 void Logic() { 
-    int prevX = tailX[0];
-    int prevY = tailY[0];
-    int prev2X, prev2Y;
-    tailX[0] = x;
-    tailY[0] = y;
+    // Variables to keep track of the position of the body extension
+    int prevX = tailX[1]; // Store previous x-coord of the second segment of the snake body
+    int prevY = tailY[1]; // Store previous y-coord of the second segment of the snake body
+    int prevXX, prevYY; // For temporary storage of the previous coordinates of the current segment
+    tailX[1] = x; // Initialize the second segment as the x-coord of the head
+    tailY[1] = y; // Initialize the second segment as the y-coord of the head
 
-    for(int i = 1; i < snake.countBody(); i++) {
-        prev2X = tailX[i];
-        prev2Y = tailY[i];
+    // Body movement implementation 
+    // oooO -> ooo O -> oo oO -> o ooO -> -oooO
+    for(int i = 2; i < snake.countBody(); i++) {
+        prevXX = tailX[i];
+        prevYY = tailY[i];
         tailX[i] = prevX;
         tailY[i] = prevY;
-        prevX = prev2X;
-        prevY = prev2Y;
+        prevX = prevXX;
+        prevY = prevYY;
     }
+
+    // Constant movement with -1 or +1 in x and y axis
     switch(dir)
     {
         case UP:
@@ -247,33 +269,46 @@ void Logic() {
         default:
             break;
     }
+    // Board collision
     if(x > boardSizeX-3 || x < 0 || y > boardSizeY-1 || y < 0) {
         gameOver = true;
     }
 
+    // Body collision
     for(int i = 1; i < snake.countBody(); i++) {
         if(tailX[i] == x && tailY[i] == y) {
             gameOver = true;
         }
     }
     
+    // Generate random x and y coordinates
     if(x == foodX && y == foodY) {
         score += 1;
         foodPosX.pop();
         foodPosY.pop();
         
-        int foodRandX = rand() % (boardSizeX-2);
-        int foodRandY = rand() % (boardSizeY-2);
-
-        while(foodRandX == x && foodRandY == y) {
+        int foodRandX, foodRandY;
+        bool foodPosFlag;
+        do {
             foodRandX = rand() % (boardSizeX-2);
             foodRandY = rand() % (boardSizeY-2);
-        }
+            foodPosFlag = false;
 
+            // Avoid spawning of food on the body of the snake
+            for (int i = 0; i < snake.countBody(); i++) {
+                if (tailX[i] == foodRandX && tailY[i] == foodRandY) {
+                    foodPosFlag = true;
+                    break;
+                }
+            }
+        }while(foodPosFlag);
+        
         foodPosX.push(foodRandX);
         foodPosY.push(foodRandY);
+        // Get x y coordinates for the food
         foodX = foodPosX.front();
         foodY = foodPosY.front();
+
         snake.addBody('o');
     }
 }
@@ -285,7 +320,7 @@ int main() {
         Draw();
         Input();
         Logic();
-        Sleep(40);
+        Sleep(100);
     }
 
     return 0;
