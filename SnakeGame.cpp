@@ -281,7 +281,7 @@ void Logic() {
         }
     }
     
-    // Generate random x and y coordinates
+    // Add body 'o' when snake hits 'F'
     if(x == foodX && y == foodY) {
         score += 1;
         foodPosX.pop();
@@ -289,6 +289,7 @@ void Logic() {
         
         int foodRandX, foodRandY;
         bool foodPosFlag;
+        // Generate random x and y coordinates
         do {
             foodRandX = rand() % (boardSizeX-2);
             foodRandY = rand() % (boardSizeY-2);
